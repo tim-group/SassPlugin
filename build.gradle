@@ -1,0 +1,40 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+
+group = 'com.youdevise'
+
+def majorVersion = 1
+def minorVersion = 0
+def isReleaseVersion = System.getenv('BUILD_NUMBER') != null
+// the date formatting is a bit overcomplicated because we need this to work in M3 (for now)
+import java.text.SimpleDateFormat
+def snapshotDateFormat = new SimpleDateFormat('yyyyMMdd-HHmmss')
+snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
+def patchVersion = isReleaseVersion ? System.getenv('BUILD_NUMBER') : snapshotDateFormat.format(new Date())
+def patchSeparator = isReleaseVersion ? '.' : '-'
+version = "${majorVersion}.${minorVersion}${patchSeparator}${patchVersion}"
+
+jar {
+    manifest {
+        attributes(
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor': 'youDevise Ltd',
+            'Implementation-Vendor-Id': project.group,
+            'Implementation-URL': 'https://github.com/youdevise/SassPlugin'
+        )
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenRepo name: 'ydPublic', urls: "${repoUrl}/groups/public"
+}
+
+dependencies {
+    groovy localGroovy()
+    compile gradleApi()
+    runtime group: 'org.jruby', name: 'jruby-complete', version: '1.6.7'
+    runtime group: 'me.n4u.sass', name: 'sass-gems', version: '3.1.15'
+}
