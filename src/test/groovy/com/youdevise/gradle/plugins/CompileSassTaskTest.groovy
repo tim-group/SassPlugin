@@ -35,6 +35,17 @@ class CompileSassTaskTest {
     }
 
     @Test
+    void taskCompilesScssFiles() throws Exception {
+        task.inputDir.mkdirs()
+        new File(task.inputDir, "hello.scss") << getClass().getResourceAsStream("hello.scss")
+        task.outputDir.mkdirs()
+
+        task.compileSass()
+
+        Assert.assertEquals(getClass().getResourceAsStream("hello.css").text, new File(task.outputDir, "hello.scss.css").text)
+    }
+
+    @Test
     void taskHandlesImports() throws Exception {
         task.inputDir.mkdirs()
         new File(task.inputDir, "hello.sass") << getClass().getResourceAsStream("importer.sass")

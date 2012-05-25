@@ -51,7 +51,7 @@ class CompileSassTask extends DefaultTask {
         def mappings = new TreeMap()
 
         inputDir.traverse(preDir: {if (it.isHidden()) return FileVisitResult.SKIP_SUBTREE}) { inputFile ->
-            if (inputFile.isFile() && inputFile.path.endsWith('.sass')) {
+            if (inputFile.isFile() && (inputFile.name.endsWith('.sass') || inputFile.name.endsWith('.scss'))) {
                 def outputFile = new File(outputDir, relativePath(inputDir, inputFile) + '.css')
                 outputFile.parentFile.mkdirs()
                 mappings.put(inputFile.path, outputFile.path)
