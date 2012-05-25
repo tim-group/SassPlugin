@@ -1,0 +1,11 @@
+#menusystem {
+  padding: 0px; }
+  #menusystem .clear {
+    border-top: 1px solid #888888; }
+  #menusystem ul.menu {
+    padding: 0;
+    white-space: nowrap; }
+    #menusystem ul.menu li {
+      display: inline-block; }
+      #menusystem ul.menu li.alternative {
+        background-color: #f7e084; }
