@@ -12,6 +12,8 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
+import groovy.io.FileVisitResult
+
 class SassPlugin implements Plugin<Project> {
     def void apply(Project project) {
         def compileSass = project.tasks.add("compileSass", CompileSassTask)
@@ -48,13 +50,12 @@ class CompileSassTask extends DefaultTask {
     def compileSass() {
         def mappings = new TreeMap()
 
-        inputDir.eachFileRecurse { inputFile ->
-            if (inputFile.isDirectory() || inputFile.isHidden()) return;
-            if (inputFile.path.contains('/.')) return;
-            if (!inputFile.path.endsWith('.sass')) return;
-            def outputFile = new File(outputDir, relativePath(inputDir, inputFile) + '.css')
-            outputFile.parentFile.mkdirs()
-            mappings.put(inputFile.path, outputFile.path)
+        inputDir.traverse(preDir: {if (it.isHidden()) return FileVisitResult.SKIP_SUBTREE}) { inputFile ->
+            if (inputFile.isFile() && inputFile.path.endsWith('.sass')) {
+                def outputFile = new File(outputDir, relativePath(inputDir, inputFile) + '.css')
+                outputFile.parentFile.mkdirs()
+                mappings.put(inputFile.path, outputFile.path)
+            }
         }
 
         def engine = new ScriptEngineManager().getEngineByName("jruby")
