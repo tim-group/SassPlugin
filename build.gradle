@@ -2,16 +2,16 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
+/*
+* HELLO! This build script works with Gradle 1.0-milestone-9.
+*/
+
 group = 'com.youdevise'
 
 def majorVersion = 1
 def minorVersion = 0
 def isReleaseVersion = System.getenv('BUILD_NUMBER') != null
-// the date formatting is a bit overcomplicated because we need this to work in M3 (for now)
-import java.text.SimpleDateFormat
-def snapshotDateFormat = new SimpleDateFormat('yyyyMMdd-HHmmss')
-snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
-def patchVersion = isReleaseVersion ? System.getenv('BUILD_NUMBER') : snapshotDateFormat.format(new Date())
+def patchVersion = isReleaseVersion ? System.getenv('BUILD_NUMBER') : new Date().format('yyyyMMdd-HHmmss', TimeZone.getTimeZone('UTC'))
 def patchSeparator = isReleaseVersion ? '.' : '-'
 version = "${majorVersion}.${minorVersion}${patchSeparator}${patchVersion}"
 
@@ -28,7 +28,6 @@ jar {
 }
 
 repositories {
-    mavenLocal()
     mavenRepo name: 'ydPublic', urls: "${repoUrl}/groups/public"
 }
 
