@@ -3,13 +3,13 @@ package com.youdevise.gradle.plugins
 import java.io.File
 import java.util.TreeMap
 
-import javax.script.ScriptEngineManager;
+import javax.script.ScriptEngineManager
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class SassPlugin implements Plugin<Project> {
