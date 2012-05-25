@@ -6,7 +6,7 @@ apply plugin: 'eclipse'
 * HELLO! This build script works with Gradle 1.0-milestone-9.
 */
 
-group = 'com.youdevise'
+group = 'com.timgroup'
 
 def majorVersion = 1
 def minorVersion = 0
@@ -34,6 +34,16 @@ repositories {
 dependencies {
     groovy localGroovy()
     compile gradleApi()
-    runtime group: 'org.jruby', name: 'jruby-complete', version: '1.6.7'
-    runtime group: 'me.n4u.sass', name: 'sass-gems', version: '3.1.15'
+    runtime group: 'org.jruby', name: 'jruby-complete', version: '1.6.7.2'
+    runtime group: 'me.n4u.sass', name: 'sass-gems', version: '3.1.16'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "${project.repoUrl}/repositories/yd-release-candidates") {
+                authentication(userName: project.repoUsername, password: project.repoPassword)
+            }
+        }
+    }
 }
