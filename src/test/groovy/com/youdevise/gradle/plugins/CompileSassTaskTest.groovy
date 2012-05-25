@@ -27,7 +27,18 @@ class CompileSassTaskTest {
     void taskCompilesSassFiles() throws Exception {
         task.inputDir.mkdirs()
         new File(task.inputDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
-        new File(task.inputDir, "imported.sass") << getClass().getResourceAsStream("imported.sass")
+        task.outputDir.mkdirs()
+
+        task.compileSass()
+
+        Assert.assertEquals(getClass().getResourceAsStream("hello.css").text, new File(task.outputDir, "hello.sass.css").text)
+    }
+
+    @Test
+    void taskHandlesImports() throws Exception {
+        task.inputDir.mkdirs()
+        new File(task.inputDir, "hello.sass") << getClass().getResourceAsStream("importer.sass")
+        new File(task.inputDir, "imported.sass") << getClass().getResourceAsStream("hello.sass")
         task.outputDir.mkdirs()
 
         task.compileSass()
@@ -50,7 +61,7 @@ class CompileSassTaskTest {
     void taskRecursesIntoSubdirectories() throws Exception {
         def subDir = new File(task.inputDir, 'sub')
         subDir.mkdirs()
-        new File(subDir, "hello.sass") << getClass().getResourceAsStream("imported.sass")
+        new File(subDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
         task.outputDir.mkdirs()
 
         task.compileSass()
@@ -62,7 +73,7 @@ class CompileSassTaskTest {
     void taskDoesNotRecurseIntoHiddenDirectories() throws Exception {
         def dotDir = new File(task.inputDir, '.svn')
         dotDir.mkdirs()
-        new File(dotDir, "imported.sass") << getClass().getResourceAsStream("imported.sass")
+        new File(dotDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
         task.outputDir.mkdirs()
 
         task.compileSass()
