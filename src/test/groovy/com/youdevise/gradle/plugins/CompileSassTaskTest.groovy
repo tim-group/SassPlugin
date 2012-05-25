@@ -27,6 +27,7 @@ class CompileSassTaskTest {
     void taskDoesTheRightThing() throws Exception {
         task.inputDir.mkdirs()
         new File(task.inputDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
+        new File(task.inputDir, "imported.sass") << getClass().getResourceAsStream("imported.sass")
         task.outputDir.mkdirs()
 
         task.compileSass()
