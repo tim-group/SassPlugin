@@ -1,22 +1,18 @@
 package com.youdevise.gradle.plugins
 
-import java.io.File
-import java.util.TreeMap
-
-import javax.script.ScriptEngineManager
-
+import groovy.io.FileVisitResult
+import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
-import groovy.io.FileVisitResult
+import javax.script.ScriptEngineManager
 
 class SassPlugin implements Plugin<Project> {
     def void apply(Project project) {
-        def compileSass = project.tasks.add("compileSass", CompileSassTask)
+        def compileSass = project.tasks.create("compileSass", CompileSassTask)
         compileSass.inputDir = project.file('src/main/sass')
         compileSass.outputDir = new File(project.buildDir, 'sass')
         compileSass.cacheLocation = new File(project.buildDir, 'sass-cache')
