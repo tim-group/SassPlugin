@@ -2,10 +2,6 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
-/*
-* HELLO! This build script works with Gradle 1.0-milestone-9.
-*/
-
 group = 'com.timgroup'
 
 if (System.getenv('BUILD_NUMBER') != null) {
