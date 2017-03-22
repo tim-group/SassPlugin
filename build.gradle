@@ -8,16 +8,9 @@ apply plugin: 'eclipse'
 
 group = 'com.timgroup'
 
-def majorVersion = 1
-def minorVersion = 0
-def isReleaseVersion = System.getenv('BUILD_NUMBER') != null
-// the date formatting is a bit overcomplicated because we need this to work in M3 (for now)
-import java.text.SimpleDateFormat
-def snapshotDateFormat = new SimpleDateFormat('yyyyMMdd-HHmmss')
-snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
-def patchVersion = isReleaseVersion ? System.getenv('BUILD_NUMBER') : snapshotDateFormat.format(new Date())
-def patchSeparator = isReleaseVersion ? '.' : '-'
-version = "${majorVersion}.${minorVersion}${patchSeparator}${patchVersion}"
+if (System.getenv('BUILD_NUMBER') != null) {
+    version = "1.0." + System.getenv('BUILD_NUMBER')
+}
 
 jar {
     manifest {
