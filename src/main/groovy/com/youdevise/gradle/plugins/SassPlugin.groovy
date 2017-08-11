@@ -30,7 +30,7 @@ class CompileSassTask extends DefaultTask {
 
     public File cacheLocation
 
-    String driverScript = '''
+    private String driverScript = '''
         require 'rubygems'
         require 'sass'
 
