@@ -1,10 +1,10 @@
 package com.youdevise.gradle.plugins
 
-import org.junit.Assert
-import org.junit.Test
-import org.junit.Before
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Test
 
 class CompileSassTaskTest {
 
@@ -13,7 +13,7 @@ class CompileSassTaskTest {
     @Before
     void task() {
         Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'sass'
+        project.apply plugin: 'com.youdevise.sass'
 
         task = project.tasks.compileSass
     }

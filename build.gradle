@@ -1,47 +1,50 @@
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'eclipse'
-
-group = 'com.timgroup'
-
-if (System.getenv('BUILD_NUMBER') != null) {
-    version = "1.0." + System.getenv('BUILD_NUMBER')
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'maven-publish'
 }
 
-jar {
-    manifest {
-        attributes(
-            'Implementation-Title': project.name,
-            'Implementation-Version': project.version,
-            'Implementation-Vendor': 'youDevise Ltd',
-            'Implementation-Vendor-Id': project.group,
-            'Implementation-URL': 'https://github.com/youdevise/SassPlugin'
-        )
-    }
+ext {
+    buildNumber = System.getenv("ORIGINAL_BUILD_NUMBER") ?: System.getenv("BUILD_NUMBER")
 }
+
+group 'com.timgroup'
+if (buildNumber) version '1.1.' + buildNumber
 
 repositories {
     maven {
         name "nexus"
-        url "${project.repoUrl}/groups/public"
+        url "${repoUrl}/groups/public"
+    }
+}
+
+gradlePlugin {
+    plugins {
+        sass {
+            id = "com.youdevise.sass"
+            implementationClass = "com.youdevise.gradle.plugins.SassPlugin"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            url "${project.repoUrl}/repositories/yd-release-candidates"
+            credentials {
+                username = project.repoUsername
+                password = project.repoPassword
+            }
+        }
     }
 }
 
 dependencies {
     compile gradleApi()
-    
-    runtime group: 'org.jruby', name: 'jruby-complete', version: '1.6.7.2'
-    runtime group: 'me.n4u.sass', name: 'sass-gems', version: '3.1.16'
-    
-    testCompile group: 'junit', name: 'junit', version: '4.10'
-}
+    compile localGroovy()
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "${project.repoUrl}/repositories/yd-release-candidates") {
-                authentication(userName: project.repoUsername, password: project.repoPassword)
-            }
-        }
-    }
+    runtime "org.jruby:jruby-complete:1.6.7.2"
+    runtime "me.n4u.sass:sass-gems:3.1.16"
+
+    testCompile "junit:junit:4.12"
 }
