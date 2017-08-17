@@ -4,13 +4,13 @@ To use it, add it to your buildscript classpath::
 
 	buildscript {
 	    dependencies {
-	        classpath group: 'com.youdevise', name: 'SassPlugin', version: '+'
+	        classpath "com.timgroup:SassPlugin:1.1.1120"
 	    }
 	}
 
 And apply the plugin::
 
-	apply plugin: 'sass'
+	apply plugin: 'com.youdevise.sass'
 
 You will then have a task called `compileSass` which you can run without further ado. It will find Sass files (Sass rather than SCSS - probably) in an input directory, and compile them into CSS files in an output directory, preserving the directory hierarchy of the files as it does so.
 
