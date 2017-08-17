@@ -1,95 +1,156 @@
 package com.youdevise.gradle.plugins
 
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-class CompileSassTaskTest {
+class CompileSassTaskTest extends Specification {
+    @Rule public final TemporaryFolder testProjectDir = new TemporaryFolder()
 
-    def task
+    File buildFile
 
-    @Before
-    void task() {
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'com.youdevise.sass'
-
-        task = project.tasks.compileSass
+    def setup() {
+        buildFile = testProjectDir.newFile('build.gradle')
     }
 
-    @Test
-    void pluginCreatesTheTask() throws Exception {
-        Assert.assertTrue(task instanceof CompileSassTask)
+    def "task compiles sass files"() {
+        given:
+        buildFile << """
+plugins {
+  id 'com.youdevise.sass'
+}
+"""
+
+        testProjectDir.newFolder("src", "main", "sass")
+        testProjectDir.newFile("src/main/sass/hello.sass") << this.class.getResourceAsStream("hello.sass")
+
+        when:
+        def result = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments("compileSass")
+            .withPluginClasspath()
+            .build()
+
+        then:
+        result.task(":compileSass").outcome == TaskOutcome.SUCCESS
+        this.class.getResourceAsStream("hello.css").text == new File(testProjectDir.getRoot(), "build/sass/hello.sass.css").text
     }
 
-    @Test
-    void taskCompilesSassFiles() throws Exception {
-        task.inputDir.mkdirs()
-        new File(task.inputDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
-        task.outputDir.mkdirs()
+    def "task compiles scss files"() {
+        given:
+        buildFile << """
+plugins {
+  id 'com.youdevise.sass'
+}
+"""
 
-        task.compileSass()
+        testProjectDir.newFolder("src", "main", "sass")
+        testProjectDir.newFile("src/main/sass/hello.scss") << this.class.getResourceAsStream("hello.scss")
 
-        Assert.assertEquals(getClass().getResourceAsStream("hello.css").text, new File(task.outputDir, "hello.sass.css").text)
+        when:
+        def result = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments("compileSass")
+            .withPluginClasspath()
+            .build()
+
+        then:
+        result.task(":compileSass").outcome == TaskOutcome.SUCCESS
+        this.class.getResourceAsStream("hello.css").text == new File(testProjectDir.getRoot(), "build/sass/hello.scss.css").text
     }
 
-    @Test
-    void taskCompilesScssFiles() throws Exception {
-        task.inputDir.mkdirs()
-        new File(task.inputDir, "hello.scss") << getClass().getResourceAsStream("hello.scss")
-        task.outputDir.mkdirs()
+    def "task handles imports"() {
+        given:
+        buildFile << """
+plugins {
+  id 'com.youdevise.sass'
+}
+"""
 
-        task.compileSass()
+        testProjectDir.newFolder("src", "main", "sass")
+        testProjectDir.newFile("src/main/sass/hello.sass") << this.class.getResourceAsStream("importer.sass")
+        testProjectDir.newFile("src/main/sass/imported.sass") << this.class.getResourceAsStream("hello.sass")
 
-        Assert.assertEquals(getClass().getResourceAsStream("hello.css").text, new File(task.outputDir, "hello.scss.css").text)
+        when:
+        def result = GradleRunner.create()
+            .withProjectDir(testProjectDir.root)
+            .withArguments("compileSass")
+            .withPluginClasspath()
+            .build()
+
+        then:
+        result.task(":compileSass").outcome == TaskOutcome.SUCCESS
+        this.class.getResourceAsStream("hello.css").text == new File(testProjectDir.getRoot(), "build/sass/hello.sass.css").text
     }
 
-    @Test
-    void taskHandlesImports() throws Exception {
-        task.inputDir.mkdirs()
-        new File(task.inputDir, "hello.sass") << getClass().getResourceAsStream("importer.sass")
-        new File(task.inputDir, "imported.sass") << getClass().getResourceAsStream("hello.sass")
-        task.outputDir.mkdirs()
+    def "task ignores files which are not sass files"() {
+        given:
+        buildFile << """
+plugins {
+  id 'com.youdevise.sass'
+}
+"""
 
-        task.compileSass()
+        testProjectDir.newFolder("src", "main", "sass")
+        testProjectDir.newFile("src/main/sass/hello.txt").text = "Ceci n'est pas de Sass"
 
-        Assert.assertEquals(getClass().getResourceAsStream("hello.css").text, new File(task.outputDir, "hello.sass.css").text)
+        when:
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments("compileSass")
+                .withPluginClasspath()
+                .build()
+
+        then:
+        result.task(":compileSass").outcome == TaskOutcome.SUCCESS
+        new File(testProjectDir.getRoot(), "build/sass").list() == null
     }
 
-    @Test
-    void taskIgnoresFilesWhichAreNotSassFiles() throws Exception {
-        task.inputDir.mkdirs()
-        new File(task.inputDir, "hello.txt").write("Ceci n'est pas de Sass")
-        task.outputDir.mkdirs()
+    def "task recurses into subdirectories"() {
+        given:
+        buildFile << """
+plugins {
+  id 'com.youdevise.sass'
+}
+"""
 
-        task.compileSass()
+        testProjectDir.newFolder("src", "main", "sass", "sub")
+        testProjectDir.newFile("src/main/sass/sub/hello.sass") << this.class.getResourceAsStream("hello.sass")
 
-        Assert.assertArrayEquals(new File[0], task.outputDir.listFiles())
+        when:
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments("compileSass")
+                .withPluginClasspath()
+                .build()
+
+        then:
+        result.task(":compileSass").outcome == TaskOutcome.SUCCESS
+        this.class.getResourceAsStream("hello.css").text == new File(testProjectDir.getRoot(), "build/sass/sub/hello.sass.css").text
     }
 
-    @Test
-    void taskRecursesIntoSubdirectories() throws Exception {
-        def subDir = new File(task.inputDir, 'sub')
-        subDir.mkdirs()
-        new File(subDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
-        task.outputDir.mkdirs()
+    def "task does not recurse into hidden directories"() {
+        given:
+        buildFile << """
+plugins {
+  id 'com.youdevise.sass'
+}
+"""
 
-        task.compileSass()
+        testProjectDir.newFolder("src", "main", "sass", ".svn")
+        testProjectDir.newFile("src/main/sass/.svn/hello.sass") << this.class.getResourceAsStream("hello.sass")
 
-        Assert.assertEquals(getClass().getResourceAsStream("hello.css").text, new File(task.outputDir, "sub/hello.sass.css").text)
+        when:
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments("compileSass")
+                .withPluginClasspath()
+                .build()
+
+        then:
+        result.task(":compileSass").outcome == TaskOutcome.SUCCESS
+        new File(testProjectDir.getRoot(), "build/sass").list() == null
     }
-
-    @Test
-    void taskDoesNotRecurseIntoHiddenDirectories() throws Exception {
-        def dotDir = new File(task.inputDir, '.svn')
-        dotDir.mkdirs()
-        new File(dotDir, "hello.sass") << getClass().getResourceAsStream("hello.sass")
-        task.outputDir.mkdirs()
-
-        task.compileSass()
-
-        Assert.assertArrayEquals(new File[0], task.outputDir.listFiles())
-    }
-
 }
