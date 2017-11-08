@@ -105,7 +105,8 @@ plugins {
 
         then:
         result.task(":compileSass").outcome == TaskOutcome.SUCCESS
-        new File(testProjectDir.getRoot(), "build/sass").list() == null
+        new File(testProjectDir.getRoot(), "build/sass").isDirectory()
+        new File(testProjectDir.getRoot(), "build/sass").list().length == 0
     }
 
     def "task recurses into subdirectories"() {
@@ -151,6 +152,7 @@ plugins {
 
         then:
         result.task(":compileSass").outcome == TaskOutcome.SUCCESS
-        new File(testProjectDir.getRoot(), "build/sass").list() == null
+        new File(testProjectDir.getRoot(), "build/sass").isDirectory()
+        new File(testProjectDir.getRoot(), "build/sass").list().length == 0
     }
 }

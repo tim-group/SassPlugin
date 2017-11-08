@@ -23,12 +23,12 @@ class SassPlugin implements Plugin<Project> {
 class CompileSassTask extends DefaultTask {
 
     @InputDirectory
-    public File inputDir
+    File inputDir
 
     @OutputDirectory
-    public File outputDir
+    File outputDir
 
-    public File cacheLocation
+    File cacheLocation
 
     private String driverScript = '''
         require 'rubygems'
