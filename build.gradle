@@ -8,13 +8,12 @@ ext {
     buildNumber = System.getenv("ORIGINAL_BUILD_NUMBER") ?: System.getenv("BUILD_NUMBER")
 }
 
-group 'com.timgroup'
-if (buildNumber) version '1.1.' + buildNumber
+group = 'com.timgroup'
+if (buildNumber) version = '1.1.' + buildNumber
 
 repositories {
     maven {
-        name "nexus"
-        url "${repoUrl}/groups/public"
+        url = "${repoUrl}/groups/public"
     }
 }
 
