@@ -7,7 +7,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 class CompileSassTaskTest extends Specification {
-    @Rule public final TemporaryFolder testProjectDir = new TemporaryFolder()
+    @Rule public TemporaryFolder testProjectDir
 
     File buildFile
 
