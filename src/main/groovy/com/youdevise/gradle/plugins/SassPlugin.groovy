@@ -21,13 +21,13 @@ class SassPlugin implements Plugin<Project> {
 class CompileSassTask extends DefaultTask {
 
     @InputDirectory
-    DirectoryProperty inputDir = project.objects.directoryProperty().convention(project.layout.projectDirectory.dir("src").dir("main").dir("sass"))
+    final DirectoryProperty inputDir = project.objects.directoryProperty().convention(project.layout.projectDirectory.dir("src").dir("main").dir("sass"))
 
     @OutputDirectory
-    DirectoryProperty outputDir = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass"))
+    final DirectoryProperty outputDir = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass"))
 
     @Internal
-    DirectoryProperty cacheLocation = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass-cache"))
+    final DirectoryProperty cacheLocation = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass-cache"))
 
     private String driverScript = '''
         require 'rubygems'
