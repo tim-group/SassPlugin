@@ -4,6 +4,7 @@ import groovy.io.FileVisitResult
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
@@ -13,24 +14,20 @@ import javax.script.ScriptEngineManager
 
 class SassPlugin implements Plugin<Project> {
     void apply(Project project) {
-        project.tasks.register("compileSass", CompileSassTask) { compileSass ->
-            compileSass.inputDir = project.file('src/main/sass')
-            compileSass.outputDir = new File(project.buildDir, 'sass')
-            compileSass.cacheLocation = new File(project.buildDir, 'sass-cache')
-        }
+        project.tasks.register("compileSass", CompileSassTask)
     }
 }
 
 class CompileSassTask extends DefaultTask {
 
     @InputDirectory
-    File inputDir
+    DirectoryProperty inputDir = project.objects.directoryProperty().convention(project.layout.projectDirectory.dir("src").dir("main").dir("sass"))
 
     @OutputDirectory
-    File outputDir
+    DirectoryProperty outputDir = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass"))
 
     @Internal
-    File cacheLocation
+    DirectoryProperty cacheLocation = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass-cache"))
 
     private String driverScript = '''
         require 'rubygems'
@@ -48,25 +45,28 @@ class CompileSassTask extends DefaultTask {
     def compileSass() {
         def mappings = new TreeMap()
 
-        inputDir.traverse(preDir: {if (it.isHidden()) return FileVisitResult.SKIP_SUBTREE}) { inputFile ->
+        def inputDirFile = inputDir.getAsFile().get()
+        def outputDirFile = outputDir.getAsFile().get()
+        def cacheLocationFile = cacheLocation.getAsFile().get()
+
+        inputDirFile.traverse(preDir: { if (it.isHidden()) return FileVisitResult.SKIP_SUBTREE }) { inputFile ->
             if (inputFile.isFile() && (inputFile.name.endsWith('.sass') || inputFile.name.endsWith('.scss'))) {
-                def outputFile = new File(outputDir, relativePath(inputDir, inputFile) + '.css')
+                def outputFile = new File(outputDirFile, relativePath(inputDirFile, inputFile) + '.css')
                 outputFile.parentFile.mkdirs()
                 mappings.put(inputFile.path, outputFile.path)
             }
         }
 
         def engine = new ScriptEngineManager().getEngineByName("jruby")
-        engine.put("cacheLocation", cacheLocation.path)
+        engine.put("cacheLocation", cacheLocationFile.path)
         engine.put("mappings", mappings)
         engine.eval(driverScript)
     }
 
-    def relativePath(File root, File descendant) {
+    static def relativePath(File root, File descendant) {
         def rootPath = root.absolutePath
         def descendantPath = descendant.absolutePath
         assert descendantPath.startsWith(rootPath)
         return descendantPath.substring(rootPath.length() + 1)
     }
-
 }
