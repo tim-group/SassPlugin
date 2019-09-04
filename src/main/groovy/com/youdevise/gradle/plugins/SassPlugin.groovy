@@ -12,12 +12,12 @@ import org.gradle.api.tasks.TaskAction
 import javax.script.ScriptEngineManager
 
 class SassPlugin implements Plugin<Project> {
-    def void apply(Project project) {
-        def compileSass = project.tasks.create("compileSass", CompileSassTask)
-        compileSass.inputDir = project.file('src/main/sass')
-        compileSass.outputDir = new File(project.buildDir, 'sass')
-        compileSass.cacheLocation = new File(project.buildDir, 'sass-cache')
-        // should add our output to the war task's input ... somewhere; somewhere it will be right if it's changed by the script
+    void apply(Project project) {
+        project.tasks.register("compileSass", CompileSassTask) { compileSass ->
+            compileSass.inputDir = project.file('src/main/sass')
+            compileSass.outputDir = new File(project.buildDir, 'sass')
+            compileSass.cacheLocation = new File(project.buildDir, 'sass-cache')
+        }
     }
 }
 
