@@ -16,21 +16,20 @@ class CompileSassTaskTest {
     @get:Rule
     val testProjectDir = TemporaryFolder()
 
-    lateinit var buildFile: File
+    private lateinit var buildFile: File
 
     @Before
     fun setup() {
         buildFile = testProjectDir.newFile("build.gradle")
-    }
-
-    @Test
-    fun `task compiles sass files`() {
         buildFile.writeText("""
             plugins {
                 id 'com.youdevise.sass'
             }
         """.trimIndent())
+    }
 
+    @Test
+    fun `task compiles sass files`() {
         testProjectDir.newFolder("src", "main", "sass")
         testProjectDir.newFile("src/main/sass/hello.sass").copyFromResource("hello.sass")
 
@@ -47,12 +46,6 @@ class CompileSassTaskTest {
 
     @Test
     fun `task compiles scss files`() {
-        buildFile.writeText("""
-            plugins {
-                id 'com.youdevise.sass'
-            }
-        """.trimIndent())
-
         testProjectDir.newFolder("src", "main", "sass")
         testProjectDir.newFile("src/main/sass/hello.scss").copyFromResource("hello.scss")
 
@@ -69,12 +62,6 @@ class CompileSassTaskTest {
 
     @Test
     fun `task handles imports`() {
-        buildFile.writeText("""
-            plugins {
-                id 'com.youdevise.sass'
-            }
-        """.trimIndent())
-
         testProjectDir.newFolder("src", "main", "sass")
         testProjectDir.newFile("src/main/sass/hello.sass").copyFromResource("importer.sass")
         testProjectDir.newFile("src/main/sass/imported.sass").copyFromResource("hello.sass")
@@ -92,12 +79,6 @@ class CompileSassTaskTest {
 
     @Test
     fun `task ignores files which are not sass files`() {
-        buildFile.writeText("""
-            plugins {
-                id 'com.youdevise.sass'
-            }
-        """.trimIndent())
-
         testProjectDir.newFolder("src", "main", "sass")
         testProjectDir.newFile("src/main/sass/hello.txt").writeText("Ceci n'est pas de Sass")
 
@@ -113,12 +94,6 @@ class CompileSassTaskTest {
 
     @Test
     fun `task recurses into subdirectories`() {
-        buildFile.writeText("""
-            plugins {
-                id 'com.youdevise.sass'
-            }
-        """.trimIndent())
-
         testProjectDir.newFolder("src", "main", "sass", "sub")
         testProjectDir.newFile("src/main/sass/sub/hello.sass").copyFromResource("hello.sass")
 
@@ -135,12 +110,6 @@ class CompileSassTaskTest {
 
     @Test
     fun `task does not recurse into hidden directories`() {
-        buildFile.writeText("""
-            plugins {
-                id 'com.youdevise.sass'
-            }
-        """.trimIndent())
-
         testProjectDir.newFolder("src", "main", "sass", ".svn")
         testProjectDir.newFile("src/main/sass/.svn/hello.sass").copyFromResource("hello.sass")
 
