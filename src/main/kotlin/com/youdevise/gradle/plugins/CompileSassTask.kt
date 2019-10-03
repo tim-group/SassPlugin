@@ -19,6 +19,11 @@ open class CompileSassTask : DefaultTask() {
     @Internal
     val cacheLocation = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("sass-cache"))
 
+    init {
+        group = "build"
+        description = "Compiles SASS or SCSS files to CSS"
+    }
+
     @TaskAction
     fun compileSass() {
         val inputDirFile = inputDir.asFile.get()
