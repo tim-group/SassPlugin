@@ -9,7 +9,7 @@ val buildNumber: String? by extra { System.getenv("ORIGINAL_BUILD_NUMBER") ?: Sy
 if (buildNumber != null) version = "1.1.${buildNumber}"
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 gradlePlugin {
