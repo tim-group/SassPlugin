@@ -1,15 +1,47 @@
 plugins {
     `java-gradle-plugin`
     `kotlin-dsl`
-    `maven-publish`
+    id("com.gradle.plugin-publish") version "2.1.1"
+    id("com.adarshr.test-logger") version "4.0.0"
 }
 
+val buildNumber = providers.environmentVariable("ORIGINAL_BUILD_NUMBER")
+    .orElse(providers.environmentVariable("BUILD_NUMBER"))
+val githubUrl by extra("https://github.com/tim-group/gradle-webpack-plugin")
+
 group = "com.timgroup"
-val buildNumber: String? by extra { System.getenv("ORIGINAL_BUILD_NUMBER") ?: System.getenv("BUILD_NUMBER") }
-if (buildNumber != null) version = "1.1.${buildNumber}"
+if (buildNumber.isPresent) version = "1.1.${buildNumber.get()}"
 
 repositories {
     mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+    withSourcesJar()
+}
+
+dependencies {
+    implementation(gradleApi())
+    runtimeOnly("org.jruby:jruby-complete:1.7.27")
+    runtimeOnly("me.n4u.sass:sass-gems:3.1.16")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(kotlin("test-junit5"))
+    testImplementation("com.natpryce:hamkrest:1.7.0.0")
+}
+
+tasks {
+    withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+        options.compilerArgs.add("-parameters")
+    }
+
+    withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
 }
 
 gradlePlugin {
@@ -21,49 +53,41 @@ gradlePlugin {
     }
 }
 
+pluginBundle {
+    website = githubUrl
+    vcsUrl = githubUrl
+    tags = setOf("nodejs", "sass")
+}
+
+val nexusRepoUrl = providers.gradleProperty("repoUrl")
+val nexusRepoUsername = providers.gradleProperty("repoUsername")
+val nexusRepoPassword = providers.gradleProperty("repoPassword")
+val codeartifactUrl = providers.environmentVariable("CODEARTIFACT_URL")
+    .orElse(providers.gradleProperty("codeartifact.url"))
+    .orElse("https://timgroup-148217964156.d.codeartifact.eu-west-1.amazonaws.com/maven/jars/")
+val codeartifactToken = providers.environmentVariable("CODEARTIFACT_TOKEN")
+    .orElse(providers.gradleProperty("codeartifact.token"))
+
 publishing {
-    val repoUrl: String by project
-    val repoUsername: String by project
-    val repoPassword: String by project
     repositories {
-        maven(url = "${repoUrl}/repositories/yd-release-candidates") {
-            credentials {
-                username = repoUsername
-                password = repoPassword
+        if (nexusRepoUrl.isPresent && nexusRepoUsername.isPresent && nexusRepoPassword.isPresent) {
+            maven("${nexusRepoUrl.get()}/repositories/yd-release-candidates") {
+                name = "nexus"
+                credentials {
+                    username = nexusRepoUsername.get()
+                    password = nexusRepoPassword.get()
+                }
+                isAllowInsecureProtocol = true
+            }
+        }
+        if (codeartifactUrl.isPresent && codeartifactToken.isPresent) {
+            maven(url = codeartifactUrl.get()) {
+                name = "codeartifact"
+                credentials {
+                    username = "aws"
+                    password = codeartifactToken.get()
+                }
             }
         }
     }
-
-}
-
-afterEvaluate {
-    publishing {
-        publications.named("pluginMaven", MavenPublication::class).configure {
-            artifact(tasks["sourcesJar"])
-        }
-    }
-}
-
-tasks.register("sourcesJar", Jar::class) {
-    dependsOn("classes")
-    archiveClassifier.set("sources")
-    from(sourceSets["main"].allSource)
-}
-
-dependencies {
-    implementation(gradleApi())
-    runtimeOnly("org.jruby:jruby-complete:1.7.27")
-    runtimeOnly("me.n4u.sass:sass-gems:3.1.16")
-    testImplementation("junit:junit:4.12")
-    testImplementation(kotlin("test-junit"))
-    testImplementation("com.natpryce:hamkrest:1.7.0.0")
-}
-
-tasks.withType(JavaCompile::class).configureEach {
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
-    options.encoding = "UTF-8"
-    options.isIncremental = true
-    options.isDeprecation = true
-    options.compilerArgs = listOf("-parameters")
 }

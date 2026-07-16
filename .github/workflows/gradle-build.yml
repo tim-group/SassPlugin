@@ -1,0 +1,40 @@
+name: Build
+on:
+  push:
+    paths-ignore:
+      - README.md
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install Java 8 to compile against
+        uses: actions/setup-java@v5
+        with:
+          distribution: zulu
+          java-version: 8
+      - name: Install Java 17 for Gradle
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Run tests
+        run: ./gradlew -Porg.gradle.java.installations.auto-download=false --warning-mode all check
+
+      - name: Test Summary
+        if: always()
+        uses: test-summary/action@v2
+        with:
+          paths: build/test-results/**/TEST-*.xml
+
+      - name: Store test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/
