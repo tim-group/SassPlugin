@@ -26,7 +26,7 @@ java {
 dependencies {
     implementation(gradleApi())
     runtimeOnly("org.jruby:jruby-complete:1.7.27")
-    runtimeOnly("me.n4u.sass:sass-gems:3.1.16")
+    runtimeOnly("me.n4u.sass:sass-gems:3.2.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(kotlin("test-junit5"))
