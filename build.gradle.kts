@@ -30,7 +30,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(kotlin("test-junit5"))
-    testImplementation("com.natpryce:hamkrest:1.7.0.0")
+    testImplementation("com.natpryce:hamkrest:1.8.0.1")
 }
 
 tasks {
