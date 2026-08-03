@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           java-version: 17
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
       - name: Run tests
         run: ./gradlew -Porg.gradle.java.installations.auto-download=false --warning-mode all check
 
